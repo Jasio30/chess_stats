@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Wooden Classic</title>
+    <style>
+        body {
+            background: transparent;
+            padding: 20px;
+            font-family: 'Georgia', serif;
+        }
+
+        .board-frame {
+            background: #5d4037;
+            /* Dark Wood */
+            border: 4px solid #3e2723;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            display: inline-block;
+        }
+
+        .inner-stats {
+            background: #efebe9;
+            /* Light felt/paper */
+            border: 2px solid #d7ccc8;
+            padding: 15px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat {
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .label {
+            display: block;
+            font-size: 12px;
+            color: #795548;
+            font-style: italic;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #d7ccc8;
+        }
+
+        .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #3e2723;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="board-frame">
+        <div class="inner-stats">
+            <div class="stat">
+                <span class="label">Won</span>
+                <span id="wins" class="value">0</span>
+            </div>
+            <div class="stat">
+                <span class="label">Drawn</span>
+                <span id="draws" class="value">0</span>
+            </div>
+            <div class="stat">
+                <span class="label">Lost</span>
+                <span id="losses" class="value">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function updateStats() {
+            try {
+                const res = await fetch("/summary_stats.json?_=" + new Date().getTime());
+                const data = await res.json();
+                document.getElementById("wins").textContent = data[0];
+                document.getElementById("draws").textContent = data[1];
+                document.getElementById("losses").textContent = data[2];
+            } catch (e) { }
+        }
+        updateStats();
+        setInterval(updateStats, 5000);
+    </script>
+</body>
+
+</html>
