@@ -1,12 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Plain Stats</title>
+  <style>
+    body {
+      font-size: 48px;
+      font-weight: bold;
+      font-family: sans-serif;
+    }
+
+    small {
+      font-size: 18px;
+      font-weight: normal;
+      color: #666;
+    }
+  </style>
 </head>
+
 <body>
-  W: <span id="wins">0</span> | 
-  D: <span id="draws">0</span> | 
+  W: <span id="wins">0</span> |
+  D: <span id="draws">0</span> |
   L: <span id="losses">0</span>
   <br>
   <small>Updated: <span id="updated">--</span></small>
@@ -28,4 +43,5 @@
     setInterval(updateStats, 5000);
   </script>
 </body>
+
 </html>
