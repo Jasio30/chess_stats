@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Plain Stats</title>
+</head>
+<body>
+  W: <span id="wins">0</span> | 
+  D: <span id="draws">0</span> | 
+  L: <span id="losses">0</span>
+  <br>
+  <small>Updated: <span id="updated">--</span></small>
+
+  <script>
+    async function updateStats() {
+      try {
+        const res = await fetch("/summary_stats.json?_=" + new Date().getTime());
+        const data = await res.json();
+        document.getElementById("wins").textContent = data[0];
+        document.getElementById("draws").textContent = data[1];
+        document.getElementById("losses").textContent = data[2];
+        document.getElementById("updated").textContent = new Date().toLocaleTimeString();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    updateStats();
+    setInterval(updateStats, 5000);
+  </script>
+</body>
+</html>
