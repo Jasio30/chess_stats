@@ -33,47 +33,236 @@ Client.request_config["headers"]["User-Agent"] = "ChessStatsApp/3.3 (your_email@
 
 
 # ===== HTML CONTENT =====
+# This is the default dashboard template. 
+# To customize, you can edit the 'stats.html' file directly in your Documents/ChessStats folder.
+# The script will only recreate this file if it is deleted.
 HTML_CONTENT = """<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Chess Stats</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess.com Live Stats</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg-color: rgba(15, 15, 15, 0.85);
+      --accent-win: #00fa9a;
+      --accent-draw: #ffce54;
+      --accent-loss: #ff4d4d;
+      --text-main: #ffffff;
+      --text-sub: #b0b0b0;
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
     body {
       margin: 0;
-      padding: 20px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #ffffff;
-      background-color: rgba(0, 0, 0, 0);
-      font-size: 32px;
-      line-height: 1.4;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      height: 100vh;
+      background-color: transparent; /* Perfect for OBS overlays */
+      overflow: hidden;
     }
-    .stat { margin-bottom: 10px; }
-    .wins { color: #4CAF50; }
-    .draws { color: #FFC107; }
-    .losses { color: #F44336; }
-    .update-time { font-size: 20px; color: #aaa; margin-top: 20px; }
+
+    .dashboard {
+      background: var(--bg-color);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      min-width: 280px;
+      animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(-30px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 12px;
+      margin-bottom: 4px;
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-main);
+    }
+
+    .stats-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 24px;
+      font-weight: 600;
+      transition: transform 0.2s ease;
+    }
+
+    .label {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .value {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .win { color: var(--accent-win); text-shadow: 0 0 15px rgba(0, 250, 154, 0.3); }
+    .draw { color: var(--accent-draw); text-shadow: 0 0 15px rgba(255, 206, 84, 0.3); }
+    .loss { color: var(--accent-loss); text-shadow: 0 0 15px rgba(255, 77, 77, 0.3); }
+
+    .ratio-bar {
+      height: 6px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      display: flex;
+      margin-top: 8px;
+    }
+
+    .bar-segment {
+      height: 100%;
+      transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .bar-win { background: var(--accent-win); }
+    .bar-draw { background: var(--accent-draw); }
+    .bar-loss { background: var(--accent-loss); }
+
+    .footer {
+      font-size: 11px;
+      color: var(--text-sub);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-win);
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 250, 154, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 250, 154, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 250, 154, 0); }
+    }
   </style>
 </head>
 <body>
-  <div class="stat wins" id="wins">Wins: ?</div>
-  <div class="stat draws" id="draws">Draws: ?</div>
-  <div class="stat losses" id="losses">Losses: ?</div>
-  <div class="update-time" id="updated">Last updated: ?</div>
+  <div class="dashboard">
+    <div class="header">
+      <h1>Session Stats</h1>
+    </div>
+    <div class="stats-container">
+      <div class="stat-row">
+        <span class="label">Wins</span>
+        <span class="value win" id="wins">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Draws</span>
+        <span class="value draw" id="draws">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Losses</span>
+        <span class="value loss" id="losses">0</span>
+      </div>
+      
+      <div class="ratio-bar">
+        <div id="bar-win" class="bar-segment bar-win" style="width: 0%"></div>
+        <div id="bar-draw" class="bar-segment bar-draw" style="width: 0%"></div>
+        <div id="bar-loss" class="bar-segment bar-loss" style="width: 0%"></div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <span><span class="dot"></span>LIVE UPDATING</span>
+      <span id="updated">--:--:--</span>
+    </div>
+  </div>
+
   <script>
+    let currentStats = [0, 0, 0];
+
+    function animateValue(id, start, end, duration) {
+      if (start === end) return;
+      const range = end - start;
+      let current = start;
+      const increment = end > start ? 1 : -1;
+      const stepTime = Math.abs(Math.floor(duration / range));
+      const obj = document.getElementById(id);
+      
+      const timer = setInterval(function() {
+        current += increment;
+        obj.textContent = current;
+        if (current == end) {
+          clearInterval(timer);
+        }
+      }, stepTime || 10);
+    }
+
     async function updateStats() {
       try {
         const res = await fetch("/summary_stats.json?_=" + new Date().getTime());
         const data = await res.json();
-        document.getElementById("wins").textContent = "Wins: " + data[0];
-        document.getElementById("draws").textContent = "Draws: " + data[1];
-        document.getElementById("losses").textContent = "Losses: " + data[2];
-        document.getElementById("updated").textContent = "Last updated: " + new Date().toLocaleTimeString();
+        
+        const w = data[0];
+        const d = data[1];
+        const l = data[2];
+        const total = w + d + l || 1;
+
+        // Animate numbers
+        animateValue("wins", currentStats[0], w, 500);
+        animateValue("draws", currentStats[1], d, 500);
+        animateValue("losses", currentStats[2], l, 500);
+        
+        currentStats = [w, d, l];
+
+        // Update bars
+        document.getElementById("bar-win").style.width = ((w / total) * 100) + "%";
+        document.getElementById("bar-draw").style.width = ((d / total) * 100) + "%";
+        document.getElementById("bar-loss").style.width = ((l / total) * 100) + "%";
+
+        document.getElementById("updated").textContent = new Date().toLocaleTimeString();
       } catch (e) {
         console.error("Failed to load stats:", e);
       }
     }
+
     updateStats();
     setInterval(updateStats, 5000);
   </script>
@@ -215,9 +404,13 @@ class CustomHandler(SimpleHTTPRequestHandler):
 
 # ===== MAIN SERVER STARTUP =====
 def run_server():
-    # Create HTML file in Documents folder
-    with open(HTML_FILE, "w", encoding="utf-8") as f:
-        f.write(HTML_CONTENT)
+    # Create HTML file in Documents folder ONLY if it doesn't exist
+    if not os.path.exists(HTML_FILE):
+        print(f"📄 Creating default dashboard at {HTML_FILE}")
+        with open(HTML_FILE, "w", encoding="utf-8") as f:
+            f.write(HTML_CONTENT)
+    else:
+        print(f"📄 Using existing dashboard at {HTML_FILE}")
 
     httpd = HTTPServer(("localhost", PORT), CustomHandler)
     url = f"http://localhost:{PORT}/stats.html"
