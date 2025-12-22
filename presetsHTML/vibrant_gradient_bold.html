@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Vibrant Gradient</title>
+    <style>
+        body {
+            background: transparent;
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2px;
+            border-radius: 20px;
+            display: inline-block;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .inner {
+            background: #111;
+            border-radius: 18px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .name {
+            color: #aaa;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .num {
+            color: #fff;
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .win-num {
+            color: #00ffcc;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+
+        .loss-num {
+            color: #ff5e62;
+            text-shadow: 0 0 10px rgba(255, 94, 98, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="inner">
+            <div class="stat">
+                <span class="name">Victory</span>
+                <span id="wins" class="num win-num">0</span>
+            </div>
+            <div class="stat">
+                <span class="name">Draw</span>
+                <span id="draws" class="num">0</span>
+            </div>
+            <div class="stat">
+                <span class="name">Defeat</span>
+                <span id="losses" class="num loss-num">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function updateStats() {
+            try {
+                const res = await fetch("/summary_stats.json?_=" + new Date().getTime());
+                const data = await res.json();
+                document.getElementById("wins").textContent = data[0];
+                document.getElementById("draws").textContent = data[1];
+                document.getElementById("losses").textContent = data[2];
+            } catch (e) { }
+        }
+        updateStats();
+        setInterval(updateStats, 5000);
+    </script>
+</body>
+
+</html>

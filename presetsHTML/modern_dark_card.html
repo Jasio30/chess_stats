@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Modern Card</title>
+    <style>
+        body {
+            background: #121212;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            padding: 20px;
+        }
+
+        .card {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .val {
+            font-size: 28px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .win {
+            color: #4CAF50;
+        }
+
+        .draw {
+            color: #FFC107;
+        }
+
+        .loss {
+            color: #F44336;
+        }
+
+        .divider {
+            width: 1px;
+            height: 40px;
+            background: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="stat-box">
+            <span class="label">Wins</span>
+            <span id="wins" class="val win">0</span>
+        </div>
+        <div class="divider"></div>
+        <div class="stat-box">
+            <span class="label">Draws</span>
+            <span id="draws" class="val draw">0</span>
+        </div>
+        <div class="divider"></div>
+        <div class="stat-box">
+            <span class="label">Losses</span>
+            <span id="losses" class="val loss">0</span>
+        </div>
+    </div>
+
+    <script>
+        async function updateStats() {
+            try {
+                const res = await fetch("/summary_stats.json?_=" + new Date().getTime());
+                const data = await res.json();
+                document.getElementById("wins").textContent = data[0];
+                document.getElementById("draws").textContent = data[1];
+                document.getElementById("losses").textContent = data[2];
+            } catch (e) { }
+        }
+        updateStats();
+        setInterval(updateStats, 5000);
+    </script>
+</body>
+
+</html>
