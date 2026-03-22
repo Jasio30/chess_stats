@@ -488,7 +488,7 @@ def export_loop():
                 history_cache.clear()
                 current_username = target_usr
                 current_start_date = target_date
-                print(f"\\n✅ Tracking {current_username} since {current_start_date.date()}...")
+                print(f"\n✅ Tracking {current_username} since {current_start_date.date()}...")
                 
             print(f"[{datetime.now().strftime('%H:%M:%S')}] Updating stats for {current_username}...")
             
@@ -853,6 +853,13 @@ class StatsApp:
         os._exit(0)
 
 def main():
+    import ctypes
+    try:
+        myappid = 'chess_stats.live_stats.1.0'
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    except Exception:
+        pass
+    
     root = tk.Tk()
     app = StatsApp(root)
     root.protocol("WM_DELETE_WINDOW", app.on_stop)

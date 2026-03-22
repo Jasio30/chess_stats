@@ -25,19 +25,28 @@ A lightweight, high-performance Python application that tracks Chess.com player 
 
 ## Installation
 
+### Option 1: Standalone Executable (Recommended)
+You do not need Python installed to run this application! Simply download the pre-compiled `chess_stats.exe` file from the [Releases](https://github.com/Jasio30/chess_stats/releases) page and double-click it to start.
+
+### Option 2: Run from Source
+If you prefer to run the script manually:
 1. Clone this repository to your local machine:
    ```bash
    git clone https://github.com/Jasio30/chess_stats.git
    cd chess_stats
    ```
-2. Run the application:
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Run the application:
    ```bash
    python chess_stats.py
    ```
 
 ## How to setup as an OBS Overlay
 
-1. Launch `chess_stats.py` to open the Configurator GUI.
+1. Launch `chess_stats.exe` (or `chess_stats.py` if running from source) to open the Configurator GUI.
 2. Enter your **Chess.com Username** and the **Start Date** to track from.
 3. Select an aesthetic preset from the dropdown menu and click **START TRACKING**.
 4. The background server starts locally on your computer. Open **OBS Studio**.
