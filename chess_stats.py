@@ -600,12 +600,10 @@ class StatsApp:
         self.root.geometry("450x440")
         
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        icon_path = os.path.join(script_dir, "icon.png")
+        icon_path = os.path.join(script_dir, "icon.ico")
         if os.path.exists(icon_path):
             try:
-                from PIL import Image, ImageTk
-                icon_img = ImageTk.PhotoImage(Image.open(icon_path))
-                self.root.iconphoto(False, icon_img)
+                self.root.iconbitmap(icon_path)
             except Exception as e:
                 print(f"Warning: Could not load app icon: {e}")
                 

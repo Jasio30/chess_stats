@@ -1,6 +1,6 @@
 # Chess.com Live Stats OBS Tracker
 
-![App Icon](icon.png)
+![App Icon](icon.ico)
 
 A lightweight, high-performance Python application that tracks Chess.com player statistics and natively hosts beautiful, auto-refreshing UI presets for live streaming via OBS Studio. The app features completely separate Thread architecture allowing zero-downtime hot swapping of players and layouts.
 
@@ -22,7 +22,6 @@ A lightweight, high-performance Python application that tracks Chess.com player 
 
 - Python 3.8+
 - `pip install requests`
-- `pip install pillow` (for high-DPI custom UI icons)
 
 ## Installation
 
