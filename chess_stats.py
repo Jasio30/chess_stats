@@ -15,7 +15,7 @@ from chessdotcom.errors import ChessDotComError
 
 # ===== CONFIGURATION =====
 PORT = 8001
-INTERVAL_SECONDS = 15  # Update from chess.com every 15s to avoid rate limits
+INTERVAL_SECONDS = 10  # Update from chess.com every 10s to avoid rate limits
 HTML_REFRESH_INTERVAL = 5 # Refresh dashboard from local JSON every 5s
 RETENTION_DAYS = 30   # Delete files older than this many days
 
@@ -560,6 +560,23 @@ def export_loop():
 # ===== CUSTOM HTTP HANDLER =====
 class CustomHandler(SimpleHTTPRequestHandler):
     """Serves files directly from Documents/ChessStats."""
+
+    def end_headers(self):
+        # Prevent caching
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
+        
+    def handle(self):
+        try:
+            super().handle()
+        except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+            pass
+        
+    def log_message(self, format, *args):
+        """Silences the continuous GET request logging to keep the console clean."""
+        pass
 
     def translate_path(self, path):
         parsed = urlparse(path)
