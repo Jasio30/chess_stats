@@ -59,6 +59,10 @@ If you prefer to run the script manually:
 
 The application natively generates a folder in your `Documents/ChessStats` directory containing the active `stats.html` broadcast payload and caching your API progress to ensure you never get rate-limited. It also saves your `user_prefs.json` so you don't have to re-type your layout the next time you boot.
 
+## Disclaimer
+
+This project is an independent open-source application and is not affiliated with, endorsed by, sponsored by, or otherwise associated with Chess.com. All related product names, logos, and brands are property of their respective owners.
+
 ## License
 
 This project is open-source and available under the [MIT License](LICENSE).
