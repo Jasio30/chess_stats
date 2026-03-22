@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lofi Pastel Clouds</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+        body { background: transparent; padding: 20px; font-family: 'Nunito', sans-serif; }
+        .cloud { background: #fdfaf6; border-radius: 50px; padding: 15px 30px; display: inline-flex; gap: 20px; box-shadow: 0 8px 25px rgba(255, 182, 193, 0.4); border: 2px solid #fdeef4; align-items: center; }
+        .stat { text-align: center; }
+        .lbl { font-size: 12px; color: #a9a9a9; display: block; font-weight: 700; text-transform: lowercase; }
+        .val { font-size: 28px; font-weight: 700; color: #ffb6c1; }
+        .val-w { color: #b0e0e6; }
+        .val-l { color: #dda0dd; }
+        .divider { width: 2px; height: 35px; background: #f0e6ea; border-radius: 2px; }
+        .chg-val { font-size: 14px; font-weight: 700; padding: 2px 6px; border-radius: 12px; }
+        .chg-pos { background: #e0ffff; color: #008b8b; }
+        .chg-neg { background: #ffe4e1; color: #c71585; }
+    </style>
+</head>
+<body>
+    <div class="cloud">
+        <div class="stat"><span class="lbl">wins</span><span id="wins" class="val val-w">0</span></div>
+        <div class="divider"></div>
+        <div class="stat"><span class="lbl">draws</span><span id="draws" class="val">0</span></div>
+        <div class="divider"></div>
+        <div class="stat"><span class="lbl">losses</span><span id="losses" class="val val-l">0</span></div>
+        <div class="divider"></div>
+        <div class="stat"><span class="lbl">rating</span><span id="rating" class="val">----</span><span id="rating-change" class="chg-val" style="display:none;"></span></div>
+    </div>
+    <script>
+        async function updateStats() {
+            try {
+                const res = await fetch("/summary_stats.json?_=" + new Date().getTime());
+                const data = await res.json();
+                document.getElementById("wins").textContent = data[0];
+                document.getElementById("draws").textContent = data[1];
+                document.getElementById("losses").textContent = data[2];
+                if(data.length > 3 && data[3] > 0) {
+                    document.getElementById("rating").textContent = data[3];
+                    let chg = data[4] || 0;
+                    let el = document.getElementById("rating-change");
+                    if (chg !== 0) {
+                        el.style.display = "inline";
+                        el.textContent = chg > 0 ? "+" + chg : chg;
+                        el.className = "chg-val " + (chg > 0 ? "chg-pos" : "chg-neg");
+                    } else {
+                        el.style.display = "none";
+                    }
+                }
+            } catch (e) { }
+        }
+        updateStats(); setInterval(updateStats, 5000);
+    </script>
+</body>
+</html>

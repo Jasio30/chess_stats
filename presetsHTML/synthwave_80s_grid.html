@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Synthwave 80s Grid</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
+        body { background: transparent; padding: 20px; font-family: 'Varela Round', sans-serif; text-transform: uppercase; color: #ff00ff; text-shadow: 0 0 10px #ff00ff; }
+        .synth-box { border: 2px solid #00ffff; box-shadow: 0 0 15px #00ffff, inset 0 0 15px #00ffff; background: linear-gradient(180deg, rgba(30,0,50,0.8) 0%, rgba(10,0,20,0.8) 100%); border-radius: 10px; padding: 20px; display: inline-block; position: relative; overflow: hidden; }
+        .synth-box::before { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 50%; background: repeating-linear-gradient(0deg, transparent, transparent 4px, rgba(0, 255, 255, 0.2) 4px, rgba(0, 255, 255, 0.2) 5px); pointer-events: none; }
+        .stats-grid { display: flex; gap: 30px; position: relative; z-index: 1; }
+        .stat { text-align: center; }
+        .lbl { font-size: 10px; letter-spacing: 3px; color: #00ffff; text-shadow: 0 0 5px #00ffff; display: block; margin-bottom: 5px; }
+        .val { font-size: 36px; }
+        .val-w { color: #00ffaa; text-shadow: 0 0 15px #00ffaa; }
+        .val-l { color: #ff0055; text-shadow: 0 0 15px #ff0055; }
+        .chg-pos { color: #00ffaa; font-size: 16px;}
+        .chg-neg { color: #ff0055; font-size: 16px;}
+    </style>
+</head>
+<body>
+    <div class="synth-box">
+        <div class="stats-grid">
+            <div class="stat"><span class="lbl">WINS</span><span id="wins" class="val val-w">0</span></div>
+            <div class="stat"><span class="lbl">DRAWS</span><span id="draws" class="val">0</span></div>
+            <div class="stat"><span class="lbl">LOSSES</span><span id="losses" class="val val-l">0</span></div>
+            <div class="stat"><span class="lbl">RATING</span><span id="rating" class="val">----</span><span id="rating-change"></span></div>
+        </div>
+    </div>
+    <script>
+        async function updateStats() {
+            try {
+                const res = await fetch("/summary_stats.json?_=" + new Date().getTime());
+                const data = await res.json();
+                document.getElementById("wins").textContent = data[0];
+                document.getElementById("draws").textContent = data[1];
+                document.getElementById("losses").textContent = data[2];
+                if(data.length > 3 && data[3] > 0) {
+                    document.getElementById("rating").textContent = data[3];
+                    let chg = data[4] || 0;
+                    let el = document.getElementById("rating-change");
+                    el.textContent = chg > 0 ? "+" + chg : (chg < 0 ? chg : "");
+                    el.className = chg > 0 ? "chg-pos" : "chg-neg";
+                }
+            } catch (e) { }
+        }
+        updateStats(); setInterval(updateStats, 5000);
+    </script>
+</body>
+</html>

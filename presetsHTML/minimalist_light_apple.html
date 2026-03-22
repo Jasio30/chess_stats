@@ -1,73 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Minimalist Light</title>
     <style>
-        body {
-            background: white;
-            color: #1d1d1f;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
-            padding: 20px;
-            display: flex;
-        }
-
-        .container {
-            background: #f5f5f7;
-            border-radius: 18px;
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            gap: 32px;
-        }
-
-        .stat {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .value {
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .label {
-            font-size: 11px;
-            color: #86868b;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .dot {
-            width: 4px;
-            height: 4px;
-            border-radius: 2px;
-            background: #d2d2d7;
-        }
+        body { background: white; color: #1d1d1f; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; padding: 20px; display: flex; }
+        .container { background: #f5f5f7; border-radius: 18px; padding: 12px 24px; display: flex; align-items: center; gap: 32px; }
+        .stat { display: flex; flex-direction: column; align-items: center; }
+        .value { font-size: 24px; font-weight: 600; }
+        .label { font-size: 11px; color: #86868b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .dot { width: 4px; height: 4px; border-radius: 2px; background: #d2d2d7; }
+        .rtg-val { color: #0066cc; }
+        .chg { font-size: 12px; margin-left: 4px; font-weight: bold;}
+        .chg-pos { color: #34c759; }
+        .chg-neg { color: #ff3b30; }
     </style>
 </head>
-
 <body>
     <div class="container">
-        <div class="stat">
-            <span class="label">Wins</span>
-            <span id="wins" class="value">0</span>
-        </div>
+        <div class="stat"><span class="label">Wins</span><span id="wins" class="value">0</span></div>
         <div class="dot"></div>
-        <div class="stat">
-            <span class="label">Draws</span>
-            <span id="draws" class="value">0</span>
-        </div>
+        <div class="stat"><span class="label">Draws</span><span id="draws" class="value">0</span></div>
         <div class="dot"></div>
-        <div class="stat">
-            <span class="label">Losses</span>
-            <span id="losses" class="value">0</span>
-        </div>
+        <div class="stat"><span class="label">Losses</span><span id="losses" class="value">0</span></div>
+        <div class="dot"></div>
+        <div class="stat"><span class="label">Rating</span><span class="value rtg-val"><span id="rating">----</span><span id="rating-change" class="chg"></span></span></div>
     </div>
-
     <script>
         async function updateStats() {
             try {
@@ -76,11 +34,16 @@
                 document.getElementById("wins").textContent = data[0];
                 document.getElementById("draws").textContent = data[1];
                 document.getElementById("losses").textContent = data[2];
+                if(data.length > 3 && data[3] > 0) {
+                    document.getElementById("rating").textContent = data[3];
+                    let chg = data[4] || 0;
+                    let el = document.getElementById("rating-change");
+                    el.textContent = chg > 0 ? "↑" + chg : (chg < 0 ? "↓" + Math.abs(chg) : "");
+                    el.className = "chg " + (chg > 0 ? "chg-pos" : "chg-neg");
+                }
             } catch (e) { }
         }
-        updateStats();
-        setInterval(updateStats, 5000);
+        updateStats(); setInterval(updateStats, 5000);
     </script>
 </body>
-
 </html>

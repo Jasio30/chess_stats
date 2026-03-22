@@ -1,91 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Cyberpunk Neon</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
-
-        body {
-            background: #050505;
-            color: #fff;
-            font-family: 'Orbitron', sans-serif;
-            padding: 20px;
-        }
-
-        .neon-panel {
-            border: 2px solid #00f3ff;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            box-shadow: 0 0 15px #00f3ff, inset 0 0 5px #00f3ff;
-            position: relative;
-            overflow: hidden;
-            clip-path: polygon(0% 0%, 100% 0%, 100% 85%, 95% 100%, 0% 100%);
-        }
-
-        .glitch-text {
-            font-size: 14px;
-            color: #ff0055;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        .stat-grid {
-            display: flex;
-            gap: 30px;
-        }
-
-        .stat {
-            flex: 1;
-        }
-
-        .label {
-            font-size: 10px;
-            color: #00f3ff;
-            display: block;
-            margin-top: 5px;
-        }
-
-        .value {
-            font-size: 36px;
-            font-weight: 900;
-            text-shadow: 2px 2px #ff0055;
-        }
-
-        .win-val {
-            color: #00ffaa;
-            text-shadow: 0 0 10px #00ffaa;
-        }
-
-        .loss-val {
-            color: #ff0055;
-            text-shadow: 0 0 10px #ff0055;
-        }
+        body { background: #050505; color: #fff; font-family: 'Orbitron', sans-serif; padding: 20px; }
+        .neon-panel { border: 2px solid #00f3ff; padding: 20px; background: rgba(0, 0, 0, 0.8); box-shadow: 0 0 15px #00f3ff, inset 0 0 5px #00f3ff; position: relative; overflow: hidden; clip-path: polygon(0% 0%, 100% 0%, 100% 85%, 95% 100%, 0% 100%); }
+        .glitch-text { font-size: 14px; color: #ff0055; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; display: block; }
+        .stat-grid { display: flex; gap: 30px; }
+        .stat { flex: 1; }
+        .label { font-size: 10px; color: #00f3ff; display: block; margin-top: 5px; }
+        .value { font-size: 36px; font-weight: 900; text-shadow: 2px 2px #ff0055; }
+        .win-val { color: #00ffaa; text-shadow: 0 0 10px #00ffaa; }
+        .loss-val { color: #ff0055; text-shadow: 0 0 10px #ff0055; }
+        .rating-val { color: #00f3ff; text-shadow: 0 0 10px #00f3ff; }
+        .chg-val { font-size: 14px; margin-left:8px; vertical-align: middle;}
+        .chg-pos { color: #00ffaa; text-shadow: none; }
+        .chg-neg { color: #ff0055; text-shadow: none; }
     </style>
 </head>
-
 <body>
     <div class="neon-panel">
         <span class="glitch-text">Session // Active</span>
         <div class="stat-grid">
-            <div class="stat">
-                <div id="wins" class="value win-val">0</div>
-                <span class="label">WINS</span>
-            </div>
-            <div class="stat">
-                <div id="draws" class="value">0</div>
-                <span class="label">DRAWS</span>
-            </div>
-            <div class="stat">
-                <div id="losses" class="value loss-val">0</div>
-                <span class="label">LOSSES</span>
-            </div>
+            <div class="stat"><div id="wins" class="value win-val">0</div><span class="label">WINS</span></div>
+            <div class="stat"><div id="draws" class="value">0</div><span class="label">DRAWS</span></div>
+            <div class="stat"><div id="losses" class="value loss-val">0</div><span class="label">LOSSES</span></div>
+            <div class="stat"><div class="value rating-val"><span id="rating">----</span><span id="rating-change" class="chg-val"></span></div><span class="label">RATING</span></div>
         </div>
     </div>
-
     <script>
         async function updateStats() {
             try {
@@ -94,11 +38,16 @@
                 document.getElementById("wins").textContent = data[0];
                 document.getElementById("draws").textContent = data[1];
                 document.getElementById("losses").textContent = data[2];
+                if(data.length > 3 && data[3] > 0) {
+                    document.getElementById("rating").textContent = data[3];
+                    let chg = data[4] || 0;
+                    let el = document.getElementById("rating-change");
+                    el.textContent = chg > 0 ? "[+" + chg + "]" : (chg < 0 ? "[" + chg + "]" : "");
+                    el.className = "chg-val " + (chg > 0 ? "chg-pos" : "chg-neg");
+                }
             } catch (e) { }
         }
-        updateStats();
-        setInterval(updateStats, 5000);
+        updateStats(); setInterval(updateStats, 5000);
     </script>
 </body>
-
 </html>

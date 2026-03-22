@@ -1,31 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <title>Plain Stats</title>
   <style>
-    body {
-      font-size: 48px;
-      font-weight: bold;
-      font-family: sans-serif;
-    }
-
-    small {
-      font-size: 18px;
-      font-weight: normal;
-      color: #666;
-    }
+    body { font-size: 48px; font-weight: bold; font-family: sans-serif; }
+    small { font-size: 18px; font-weight: normal; color: #666; }
+    .rtg { color: #0066cc; }
+    .chg-pos { color: green; }
+    .chg-neg { color: red; }
   </style>
 </head>
-
 <body>
-  W: <span id="wins">0</span> |
-  D: <span id="draws">0</span> |
-  L: <span id="losses">0</span>
+  W: <span id="wins">0</span> | D: <span id="draws">0</span> | L: <span id="losses">0</span> | R: <span id="rating" class="rtg">----</span> <small id="rating-change"></small>
   <br>
   <small>Updated: <span id="updated">--</span></small>
-
   <script>
     async function updateStats() {
       try {
@@ -35,13 +24,16 @@
         document.getElementById("draws").textContent = data[1];
         document.getElementById("losses").textContent = data[2];
         document.getElementById("updated").textContent = new Date().toLocaleTimeString();
-      } catch (e) {
-        console.error(e);
-      }
+        if(data.length > 3 && data[3] > 0) {
+            document.getElementById("rating").textContent = data[3];
+            let chg = data[4] || 0;
+            let el = document.getElementById("rating-change");
+            el.textContent = chg > 0 ? "(+" + chg + ")" : (chg < 0 ? "(" + chg + ")" : "");
+            el.className = chg > 0 ? "chg-pos" : "chg-neg";
+        }
+      } catch (e) {}
     }
-    updateStats();
-    setInterval(updateStats, 5000);
+    updateStats(); setInterval(updateStats, 5000);
   </script>
 </body>
-
 </html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Minimalist Dark OBS</title>
+    <style>
+        body { background: transparent; padding: 20px; font-family: sans-serif; color: #ffffff; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
+        .grid { display: inline-grid; grid-template-columns: auto auto; column-gap: 20px; row-gap: 10px; }
+        .lbl { font-size: 16px; font-weight: bold; opacity: 0.9; }
+        .val { font-size: 18px; font-weight: bold; }
+        .w { color: #4caf50; }
+        .d { color: #ffeb3b; }
+        .l { color: #f44336; }
+        .r { color: #2196f3; }
+        .chg-val { font-size: 14px; margin-left: 5px; }
+        .chg-pos { color: #4caf50; }
+        .chg-neg { color: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="grid">
+        <span class="lbl">Wins</span><span id="wins" class="val w">0</span>
+        <span class="lbl">Draws</span><span id="draws" class="val d">0</span>
+        <span class="lbl">Losses</span><span id="losses" class="val l">0</span>
+        <span class="lbl">Rating</span><span class="val r"><span id="rating">----</span> <span id="rating-change" class="chg-val"></span></span>
+    </div>
+    <script>
+        async function updateStats() {
+            try {
+                const res = await fetch("/summary_stats.json?_=" + new Date().getTime());
+                const data = await res.json();
+                document.getElementById("wins").textContent = data[0];
+                document.getElementById("draws").textContent = data[1];
+                document.getElementById("losses").textContent = data[2];
+                if(data.length > 3 && data[3] > 0) {
+                    document.getElementById("rating").textContent = data[3];
+                    let chg = data[4] || 0;
+                    let el = document.getElementById("rating-change");
+                    el.textContent = chg > 0 ? "+" + chg : (chg < 0 ? chg : "");
+                    el.className = "chg-val " + (chg > 0 ? "chg-pos" : "chg-neg");
+                }
+            } catch (e) { }
+        }
+        updateStats(); setInterval(updateStats, 5000);
+    </script>
+</body>
+</html>

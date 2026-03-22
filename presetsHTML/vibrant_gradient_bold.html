@@ -1,84 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Vibrant Gradient</title>
     <style>
-        body {
-            background: transparent;
-            margin: 0;
-            padding: 20px;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        .container {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 2px;
-            border-radius: 20px;
-            display: inline-block;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .inner {
-            background: #111;
-            border-radius: 18px;
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .stat {
-            display: flex;
-            justify-content: space-between;
-            gap: 40px;
-            align-items: center;
-        }
-
-        .name {
-            color: #aaa;
-            font-size: 14px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .num {
-            color: #fff;
-            font-size: 32px;
-            font-weight: 800;
-        }
-
-        .win-num {
-            color: #00ffcc;
-            text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
-        }
-
-        .loss-num {
-            color: #ff5e62;
-            text-shadow: 0 0 10px rgba(255, 94, 98, 0.3);
-        }
+        body { background: transparent; margin: 0; padding: 20px; font-family: 'Segoe UI', sans-serif; }
+        .container { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2px; border-radius: 20px; display: inline-block; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); }
+        .inner { background: #111; border-radius: 18px; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
+        .stat { display: flex; justify-content: space-between; gap: 40px; align-items: center; }
+        .name { color: #aaa; font-size: 14px; font-weight: bold; text-transform: uppercase; }
+        .num { color: #fff; font-size: 32px; font-weight: 800; }
+        .win-num { color: #00ffcc; text-shadow: 0 0 10px rgba(0, 255, 204, 0.3); }
+        .loss-num { color: #ff5e62; text-shadow: 0 0 10px rgba(255, 94, 98, 0.3); }
+        .rtg-num { color: #66ccff; text-shadow: 0 0 10px rgba(102, 204, 255, 0.3); }
+        .chg-val { font-size: 14px; margin-left:8px; vertical-align: middle;}
+        .chg-pos { color: #00ffcc; text-shadow: none; }
+        .chg-neg { color: #ff5e62; text-shadow: none; }
     </style>
 </head>
-
 <body>
     <div class="container">
         <div class="inner">
-            <div class="stat">
-                <span class="name">Victory</span>
-                <span id="wins" class="num win-num">0</span>
-            </div>
-            <div class="stat">
-                <span class="name">Draw</span>
-                <span id="draws" class="num">0</span>
-            </div>
-            <div class="stat">
-                <span class="name">Defeat</span>
-                <span id="losses" class="num loss-num">0</span>
-            </div>
+            <div class="stat"><span class="name">Victory</span><span id="wins" class="num win-num">0</span></div>
+            <div class="stat"><span class="name">Draw</span><span id="draws" class="num">0</span></div>
+            <div class="stat"><span class="name">Defeat</span><span id="losses" class="num loss-num">0</span></div>
+            <div class="stat"><span class="name">Rating</span><span class="num rtg-num"><span id="rating">----</span><span id="rating-change" class="chg-val"></span></span></div>
         </div>
     </div>
-
     <script>
         async function updateStats() {
             try {
@@ -87,11 +35,16 @@
                 document.getElementById("wins").textContent = data[0];
                 document.getElementById("draws").textContent = data[1];
                 document.getElementById("losses").textContent = data[2];
+                if(data.length > 3 && data[3] > 0) {
+                    document.getElementById("rating").textContent = data[3];
+                    let chg = data[4] || 0;
+                    let el = document.getElementById("rating-change");
+                    el.textContent = chg > 0 ? "(+" + chg + ")" : (chg < 0 ? "(" + chg + ")" : "");
+                    el.className = "chg-val " + (chg > 0 ? "chg-pos" : "chg-neg");
+                }
             } catch (e) { }
         }
-        updateStats();
-        setInterval(updateStats, 5000);
+        updateStats(); setInterval(updateStats, 5000);
     </script>
 </body>
-
 </html>

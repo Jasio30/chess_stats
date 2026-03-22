@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Military HUD Tactical</title>
+    <style>
+        body { background: transparent; padding: 20px; font-family: "Lucida Console", Monaco, monospace; color: #4caf50; }
+        .hud { border: 2px solid #2e7d32; background: rgba(27, 94, 32, 0.1); padding: 15px; display: inline-block; position: relative; }
+        .hud::before, .hud::after { content: ""; position: absolute; width: 10px; height: 10px; border: 2px solid #81c784; }
+        .hud::before { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .hud::after { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 30px; }
+        .item { display: flex; justify-content: space-between; }
+        .lbl { font-size: 12px; opacity: 0.8; }
+        .val { font-size: 16px; font-weight: bold; }
+        .title { border-bottom: 1px dotted #4caf50; margin-bottom: 10px; font-size: 10px; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+    <div class="hud">
+        <div class="title">TARGET ACQUISITION LOG</div>
+        <div class="grid">
+            <div class="item"><span class="lbl">W:</span><span id="wins" class="val">0</span></div>
+            <div class="item"><span class="lbl">D:</span><span id="draws" class="val">0</span></div>
+            <div class="item"><span class="lbl">L:</span><span id="losses" class="val">0</span></div>
+            <div class="item"><span class="lbl">EL:</span><span class="val"><span id="rating">----</span> <span id="rating-change" style="font-size:12px;"></span></span></div>
+        </div>
+    </div>
+    <script>
+        async function updateStats() {
+            try {
+                const res = await fetch("/summary_stats.json?_=" + new Date().getTime());
+                const data = await res.json();
+                document.getElementById("wins").textContent = data[0].toString().padStart(3, '0');
+                document.getElementById("draws").textContent = data[1].toString().padStart(3, '0');
+                document.getElementById("losses").textContent = data[2].toString().padStart(3, '0');
+                if(data.length > 3 && data[3] > 0) {
+                    document.getElementById("rating").textContent = data[3];
+                    let chg = data[4] || 0;
+                    document.getElementById("rating-change").textContent = chg > 0 ? "(+" + chg + ")" : (chg < 0 ? "(" + chg + ")" : "");
+                }
+            } catch (e) { }
+        }
+        updateStats(); setInterval(updateStats, 5000);
+    </script>
+</body>
+</html>

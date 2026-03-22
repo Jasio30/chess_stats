@@ -1,83 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Modern Card</title>
     <style>
-        body {
-            background: #121212;
-            color: #e0e0e0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            display: flex;
-            padding: 20px;
-        }
-
-        .card {
-            background: #1e1e1e;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            display: flex;
-            gap: 24px;
-            align-items: center;
-        }
-
-        .stat-box {
-            text-align: center;
-        }
-
-        .val {
-            font-size: 28px;
-            font-weight: bold;
-            display: block;
-        }
-
-        .label {
-            font-size: 12px;
-            color: #888;
-            text-transform: uppercase;
-        }
-
-        .win {
-            color: #4CAF50;
-        }
-
-        .draw {
-            color: #FFC107;
-        }
-
-        .loss {
-            color: #F44336;
-        }
-
-        .divider {
-            width: 1px;
-            height: 40px;
-            background: #333;
-        }
+        body { background: #121212; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; display: flex; padding: 20px; }
+        .card { background: #1e1e1e; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); display: flex; gap: 24px; align-items: center; }
+        .stat-box { text-align: center; }
+        .val { font-size: 28px; font-weight: bold; display: block; }
+        .label { font-size: 12px; color: #888; text-transform: uppercase; }
+        .win { color: #4CAF50; }
+        .draw { color: #FFC107; }
+        .loss { color: #F44336; }
+        .rtg { color: #2196F3; }
+        .divider { width: 1px; height: 40px; background: #333; }
+        .chg { font-size: 14px; margin-left: 2px;}
+        .chg-pos { color: #4CAF50; }
+        .chg-neg { color: #F44336; }
     </style>
 </head>
-
 <body>
     <div class="card">
-        <div class="stat-box">
-            <span class="label">Wins</span>
-            <span id="wins" class="val win">0</span>
-        </div>
+        <div class="stat-box"><span class="label">Wins</span><span id="wins" class="val win">0</span></div>
         <div class="divider"></div>
-        <div class="stat-box">
-            <span class="label">Draws</span>
-            <span id="draws" class="val draw">0</span>
-        </div>
+        <div class="stat-box"><span class="label">Draws</span><span id="draws" class="val draw">0</span></div>
         <div class="divider"></div>
-        <div class="stat-box">
-            <span class="label">Losses</span>
-            <span id="losses" class="val loss">0</span>
-        </div>
+        <div class="stat-box"><span class="label">Losses</span><span id="losses" class="val loss">0</span></div>
+        <div class="divider"></div>
+        <div class="stat-box"><span class="label">Rating</span><span class="val rtg"><span id="rating">----</span><span id="rating-change" class="chg"></span></span></div>
     </div>
-
     <script>
         async function updateStats() {
             try {
@@ -86,11 +37,16 @@
                 document.getElementById("wins").textContent = data[0];
                 document.getElementById("draws").textContent = data[1];
                 document.getElementById("losses").textContent = data[2];
+                if(data.length > 3 && data[3] > 0) {
+                    document.getElementById("rating").textContent = data[3];
+                    let chg = data[4] || 0;
+                    let el = document.getElementById("rating-change");
+                    el.textContent = chg > 0 ? "+" + chg : (chg < 0 ? chg : "");
+                    el.className = "chg " + (chg > 0 ? "chg-pos" : "chg-neg");
+                }
             } catch (e) { }
         }
-        updateStats();
-        setInterval(updateStats, 5000);
+        updateStats(); setInterval(updateStats, 5000);
     </script>
 </body>
-
 </html>

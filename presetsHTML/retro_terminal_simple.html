@@ -1,51 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Retro Terminal</title>
     <style>
-        body {
-            background: #000;
-            color: #00ff00;
-            font-family: 'Courier New', Courier, monospace;
-            padding: 20px;
-            text-transform: uppercase;
-        }
-
-        .container {
-            border: 1px solid #00ff00;
-            display: inline-block;
-            padding: 15px;
-        }
-
-        .stat {
-            margin: 5px 0;
-        }
-
-        .cursor {
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
-        }
+        body { background: #000; color: #00ff00; font-family: 'Courier New', Courier, monospace; padding: 20px; text-transform: uppercase; }
+        .container { border: 1px solid #00ff00; display: inline-block; padding: 15px; }
+        .stat { margin: 5px 0; }
+        .cursor { animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .rtg { color: #00ffff; font-weight:bold; }
     </style>
 </head>
-
 <body>
     <div class="container">
         <div>> SYSTEM_STATS_LOADED</div>
         <div class="stat">WINS....[<span id="wins">0</span>]</div>
         <div class="stat">DRAWS...[<span id="draws">0</span>]</div>
         <div class="stat">LOSSES..[<span id="losses">0</span>]</div>
+        <div class="stat">RATING..[<span id="rating" class="rtg">----</span><span id="rating-change"></span>]</div>
         <div style="margin-top: 10px; font-size: 0.8em; color: #008800;">
             LAST_SYNC: <span id="updated">--</span><span class="cursor">_</span>
         </div>
     </div>
-
     <script>
         async function updateStats() {
             try {
@@ -55,11 +32,14 @@
                 document.getElementById("draws").textContent = data[1].toString().padStart(3, '0');
                 document.getElementById("losses").textContent = data[2].toString().padStart(3, '0');
                 document.getElementById("updated").textContent = new Date().toLocaleTimeString();
-            } catch (e) { console.error(e); }
+                if(data.length > 3 && data[3] > 0) {
+                    document.getElementById("rating").textContent = data[3];
+                    let chg = data[4] || 0;
+                    document.getElementById("rating-change").textContent = chg > 0 ? " (+" + chg + ")" : (chg < 0 ? " (" + chg + ")" : "");
+                }
+            } catch (e) { }
         }
-        updateStats();
-        setInterval(updateStats, 5000);
+        updateStats(); setInterval(updateStats, 5000);
     </script>
 </body>
-
 </html>
