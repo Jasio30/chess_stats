@@ -513,6 +513,7 @@ def export_loop():
                     cr = data["current_rating"]
                 else:
                     res = get_month_stats(current_username, y, m, current_start_date)
+                    time.sleep(1)  # Add a delay to prevent overloading Chess.com's API
                     if not res["success"]:
                         raise Exception(f"API fetch failed for {y}-{m:02d}, skipping cycle.")
                     
@@ -581,8 +582,9 @@ class CustomHandler(SimpleHTTPRequestHandler):
 
     def translate_path(self, path):
         parsed = urlparse(path)
-        clean_path = parsed.path.lstrip("/")
-        return os.path.join(DOCS_DIR, clean_path)
+        # Strip out directory traversal attempts by filtering '.' and '..'
+        parts = [p for p in parsed.path.split('/') if p and p not in ('.', '..')]
+        return os.path.join(DOCS_DIR, *parts)
 
 
 # ===== MAIN SERVER STARTUP =====
