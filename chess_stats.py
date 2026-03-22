@@ -42,11 +42,30 @@ HTML_CONTENT = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chess.com Live Stats</title>
+  <title>Chess Stats Live Tracker</title>
+  <script>
+      let currentPresetVersion = null;
+      setInterval(async () => {
+          try {
+              let res = await fetch("/version.json?_=" + new Date().getTime());
+              let data = await res.json();
+              if (currentPresetVersion === null) {
+                  currentPresetVersion = data.version;
+              } else if (currentPresetVersion !== data.version) {
+                  location.reload();
+              }
+          } catch(e) {}
+      }, 2000);
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
+    /* Automatically scale up the entire overlay for higher native resolution in OBS */
+    body {
+      zoom: 2.5; 
+      transform-origin: top left;
+    }
     :root {
       --bg-color: rgba(15, 15, 20, 0.75);
       --accent-win: #00fa9a;
@@ -439,10 +458,15 @@ def get_month_stats(username: str, year: int, month: int, start_date: datetime):
         }
 
 
-def export_loop(username: str, start_date: datetime):
+TRACKER_STATE = {"username": None, "start_date": None}
+EXPORT_THREAD_STARTED = False
+
+def export_loop():
     """Loop that periodically updates stats in the JSON file, caching historical months."""
     # Cache for closed months: (year, month) -> stats dict
     history_cache = {}
+    current_username = None
+    current_start_date = None
 
     # Initialize file immediately to avoid 404s
     try:
@@ -453,7 +477,20 @@ def export_loop(username: str, start_date: datetime):
 
     while True:
         try:
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] Updating stats for {username}...")
+            target_usr = TRACKER_STATE["username"]
+            target_date = TRACKER_STATE["start_date"]
+            
+            if not target_usr or not target_date:
+                time.sleep(1)
+                continue
+                
+            if target_usr != current_username or target_date != current_start_date:
+                history_cache.clear()
+                current_username = target_usr
+                current_start_date = target_date
+                print(f"\\n✅ Tracking {current_username} since {current_start_date.date()}...")
+                
+            print(f"[{datetime.now().strftime('%H:%M:%S')}] Updating stats for {current_username}...")
             
             now = datetime.now()
             
@@ -462,7 +499,7 @@ def export_loop(username: str, start_date: datetime):
             latest_rating = 0
             
             # Iterate from start_date year/month up to current year/month
-            y, m = start_date.year, start_date.month
+            y, m = current_start_date.year, current_start_date.month
             
             while (y < now.year) or (y == now.year and m <= now.month):
                 period = (y, m)
@@ -474,7 +511,7 @@ def export_loop(username: str, start_date: datetime):
                     sr = data["starting_rating"]
                     cr = data["current_rating"]
                 else:
-                    res = get_month_stats(username, y, m, start_date)
+                    res = get_month_stats(current_username, y, m, current_start_date)
                     if not res["success"]:
                         raise Exception(f"API fetch failed for {y}-{m:02d}, skipping cycle.")
                     
@@ -603,15 +640,24 @@ class StatsApp:
         if os.path.exists(presets_dir):
             for f in os.listdir(presets_dir):
                 if f.endswith(".html"):
-                    self.presets.append(f)
-                    self.preset_files[f] = os.path.join(presets_dir, f)
+                    ui_name = f.replace(".html", "").replace("_", " ").title()
+                    self.presets.append(ui_name)
+                    self.preset_files[ui_name] = os.path.join(presets_dir, f)
                     
+        saved_preset = self.prefs.get("preset", "")
+        if saved_preset.endswith(".html"):
+            saved_preset = saved_preset.replace(".html", "").replace("_", " ").title()
+            self.prefs["preset"] = saved_preset
+            
         if self.prefs.get("preset") not in self.presets:
             self.prefs["preset"] = "Default (Built-in)"
 
         self.var_username = tk.StringVar(value=self.prefs["username"])
         self.var_date = tk.StringVar(value=self.prefs["start_date"])
         self.var_preset = tk.StringVar(value=self.prefs["preset"])
+        
+        global HTML_CONTENT
+        self.default_html = HTML_CONTENT
         
         self.setup_ui()
         
@@ -673,6 +719,13 @@ class StatsApp:
         self.lbl_status = tk.Label(container, text="STATUS: WAITING FOR INPUT", bg=self.bg_color, fg="#888888", font=font_lbl, pady=25)
         self.lbl_status.pack(side=tk.BOTTOM)
 
+    def ping_version(self):
+        try:
+            with open(os.path.join(DOCS_DIR, "version.json"), "w") as f:
+                json.dump({"version": time.time()}, f)
+        except:
+            pass
+
     def on_start(self):
         u = self.var_username.get().strip()
         d = self.var_date.get().strip()
@@ -694,15 +747,19 @@ class StatsApp:
         except:
             pass
             
-        self.ent_user.config(state="disabled")
-        self.ent_date.config(state="disabled")
-        self.cb.config(state="disabled")
+        global TRACKER_STATE
+        TRACKER_STATE["username"] = u
+        TRACKER_STATE["start_date"] = start_dt
+        self.ping_version()
         
         self.btn_start.pack_forget()
         self.btn_reset.pack_forget()
         
+        self.btn_swap = tk.Button(self.btn_frame, text="UPDATE TRACKING", font=("Segoe UI", 10, "bold"), bg="#4da6ff", fg="#000000", activebackground="#1a8cff", relief=tk.FLAT, command=self.on_change_preset)
+        self.btn_swap.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0,10), ipady=5)
+
         self.btn_stop = tk.Button(self.btn_frame, text="STOP & EXIT", font=("Segoe UI", 10, "bold"), bg="#ff4d4d", fg="#ffffff", activebackground="#cc0000", relief=tk.FLAT, command=self.on_stop)
-        self.btn_stop.pack(fill=tk.X, expand=True, ipady=5)
+        self.btn_stop.pack(side=tk.RIGHT, fill=tk.X, expand=True, ipady=5)
         
         self.lbl_status.config(text=f"STATUS: TRACKING {u.upper()} | PORT {PORT}", fg=self.accent_color)
         
@@ -713,8 +770,60 @@ class StatsApp:
                 HTML_CONTENT = f.read()
 
         cleanup_old_files(DOCS_DIR, RETENTION_DAYS)
-        threading.Thread(target=export_loop, args=(u, start_dt), daemon=True).start()
-        threading.Thread(target=run_server, daemon=True).start()
+        global EXPORT_THREAD_STARTED
+        if not EXPORT_THREAD_STARTED:
+            threading.Thread(target=export_loop, daemon=True).start()
+            threading.Thread(target=run_server, daemon=True).start()
+            EXPORT_THREAD_STARTED = True
+        else:
+            html_path = os.path.join(DOCS_DIR, "stats.html")
+            try:
+                with open(html_path, "w", encoding="utf-8") as f:
+                    f.write(HTML_CONTENT)
+            except:
+                pass
+        
+    def on_change_preset(self):
+        u = self.var_username.get().strip()
+        d = self.var_date.get().strip()
+        p = self.var_preset.get().strip()
+        
+        if not u:
+            messagebox.showerror("Error", "Username is required")
+            return
+            
+        try:
+            start_dt = datetime.strptime(d, "%Y-%m-%d")
+        except ValueError:
+            messagebox.showerror("Error", "Invalid Date format. Use YYYY-MM-DD")
+            return
+
+        global TRACKER_STATE
+        TRACKER_STATE["username"] = u
+        TRACKER_STATE["start_date"] = start_dt
+        self.ping_version()
+        
+        preset_path = self.preset_files.get(p)
+        global HTML_CONTENT
+        if p != "Default (Built-in)" and preset_path and os.path.exists(preset_path):
+            with open(preset_path, "r", encoding="utf-8") as f:
+                HTML_CONTENT = f.read()
+        else:
+            HTML_CONTENT = self.default_html
+            
+        html_path = os.path.join(DOCS_DIR, "stats.html")
+        try:
+            with open(html_path, "w", encoding="utf-8") as f:
+                f.write(HTML_CONTENT)
+            self.lbl_status.config(text=f"STATUS: TRACKING {u.upper()} | {p}", fg=self.accent_color)
+            
+            self.prefs["preset"] = p
+            self.prefs["username"] = u
+            self.prefs["start_date"] = d
+            with open(PREFS_FILE, "w") as f:
+                json.dump(self.prefs, f)
+        except Exception as e:
+            print("Error hot-swapping preset:", e)
         
     def on_reset(self):
         self.var_username.set("")

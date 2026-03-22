@@ -6,10 +6,33 @@
   <style>
     body { font-size: 48px; font-weight: bold; font-family: sans-serif; }
     small { font-size: 18px; font-weight: normal; color: #666; }
-    .rtg { color: #0066cc; }
-    .chg-pos { color: green; }
-    .chg-neg { color: red; }
+    .rtg { color: inherit; }
+    .chg-pos { color: inherit; }
+    .chg-neg { color: inherit; }
   </style>
+
+    <style>
+        /* Automatically scale up the entire overlay for higher native resolution in OBS */
+        body {
+            zoom: 2.5; 
+            transform-origin: top left;
+        }
+    </style>
+
+    <script>
+        let currentPresetVersion = null;
+        setInterval(async () => {
+            try {
+                let res = await fetch("/version.json?_=" + new Date().getTime());
+                let data = await res.json();
+                if (currentPresetVersion === null) {
+                    currentPresetVersion = data.version;
+                } else if (currentPresetVersion !== data.version) {
+                    location.reload();
+                }
+            } catch(e) {}
+        }, 2000);
+    </script>
 </head>
 <body>
   W: <span id="wins">0</span> | D: <span id="draws">0</span> | L: <span id="losses">0</span> | R: <span id="rating" class="rtg">----</span> <small id="rating-change"></small>

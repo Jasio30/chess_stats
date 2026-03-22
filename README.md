@@ -1,71 +1,56 @@
-# ♟️ ChessStats Live Overlay
+# Chess.com Live Stats OBS Tracker
 
-A lightweight, efficient Python-based live tracking system for Chess.com game statistics. Designed to be used as a source for OBS/streaming software or as a personal performance dashboard.
+![App Icon](icon.png)
 
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)
-![Chess.com](https://img.shields.io/badge/API-Chess.com-green)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+A lightweight, high-performance Python application that tracks Chess.com player statistics and natively hosts beautiful, auto-refreshing UI presets for live streaming via OBS Studio. The app features completely separate Thread architecture allowing zero-downtime hot swapping of players and layouts.
 
-## 🚀 Overview
+## Features
 
-ChessStats monitors a player's performance from a specified starting date, aggregating wins, draws, and losses. Unlike simple scrapers, it features **historical caching** to optimize API usage and prevent rate-limiting while providing a **live-updating web interface**.
+- **Live Leaderboard Tracking**: Streams Win/Draw/Loss and Rating shifts directly from the Chess.com unified API.
+- **Auto-Refresh Core**: Emits a `location.reload()` DOM signal to all connected dashboards the second you change a setting, eliminating the need to ever manually refresh OBS sources.
+- **Zero-Downtime Hot Swapping**: Switch current tracking user, start date, or visual preset directly from the Setup panel mid-stream without terminating server threads or tracking loops.
+- **OBS High-DPI Vector Scaling**: The Chromium engine automatically enlarges and crisply scales all vector fonts and UI elements natively (2.5x base resolution) preventing OBS source pixelation.
+- **Immersive Dark Config**: Features a custom-rendered `Tkinter` application frame wrapped in native Windows 11 Dark Mode DWM logic and a high-resolution logo.
+- **15+ Custom Web Presets**: Select from over 15 dynamically patched HTML themes including:
+  - `Cyberpunk Neon Edgy`
+  - `Retro Terminal Simple`
+  - `Synthwave 80s Grid`
+  - `Minimalist Dark Obs` (Perfect for transparent overlays!)
+  - *...and many more!*
 
-## ✨ Key Features
+## Prerequisites
 
-- **Smart Caching:** Identifies "closed" months and caches them locally, ensuring only the current month is polled for updates.
-- **Embedded Web Server:** Automatically spins up a local server (`localhost:8001`) to serve a clean, glassmorphism-inspired overlay.
-- **Automated Cleanup:** Manages the `Documents/ChessStats` storage folder by automatically archiving/deleting logs older than 30 days.
-- **Stream-Ready:** The output is a transparent, high-contrast HTML page perfectly suited for OBS Browser Sources.
-- **Robust Error Handling:** Built-in protection against API downtime and malformed data.
+- Python 3.8+
+- `pip install requests`
+- `pip install pillow` (for high-DPI custom UI icons)
 
-## 🛠️ Installation
+## Installation
 
-### 1. Prerequisite
-Ensure you have Python 3.8 or higher installed on your system.
-
-### 2. Install Dependencies
-This project utilizes the official `chess.com` wrapper:
-
-```bash
-pip install chessdotcom
-```
-
-### 3. File Structure
-The script stores all configuration and temporary files in a dedicated folder:
-`C:/Users/<User>/Documents/ChessStats`
-
-## 📖 Usage
-
-1. **Run the script:**
+1. Clone this repository to your local machine:
+   ```bash
+   git clone https://github.com/Jasio30/chess_stats.git
+   cd chess_stats
+   ```
+2. Run the application:
    ```bash
    python chess_stats.py
    ```
-2. **Configuration:**
-   - Enter your **Chess.com username**.
-   - Enter the **Start Date** (Format: `YYYY-MM-DD`). The script will begin calculating your record from this date forward.
-3. **View Stats:**
-   - Your browser will automatically open `http://localhost:8001/stats.html`.
-   - In **OBS**, add a new **Browser Source** and point it to the URL above. Set the background to transparent if desired.
 
-## ⚙️ Configuration
+## How to setup as an OBS Overlay
 
-You can modify the constants at the top of `chess_stats.py` to customize the behavior:
+1. Launch `chess_stats.py` to open the Configurator GUI.
+2. Enter your **Chess.com Username** and the **Start Date** to track from.
+3. Select an aesthetic preset from the dropdown menu and click **START TRACKING**.
+4. The background server starts locally on your computer. Open **OBS Studio**.
+5. Add a new **Browser Source**.
+6. Set the URL to: `http://localhost:8001/stats.html`
+7. Set the Width and Height to roughly `600x200` (adjust as needed; presets natively zoom 250% for crispness).
+8. Feel free to Hot-Swap presets in the GUI! OBS will automatically reload the new styles seamlessly!
 
-| Constant | Description | Default |
-| :--- | :--- | :--- |
-| `PORT` | The port for the local web server | `8001` |
-| `INTERVAL_SECONDS` | How often to poll for new games | `5` |
-| `RETENTION_DAYS` | How long to keep temporary logs | `30` |
+## Preferences
 
-## 🧩 Architecture
+The application natively generates a folder in your `Documents/ChessStats` directory containing the active `stats.html` broadcast payload and caching your API progress to ensure you never get rate-limited. It also saves your `user_prefs.json` so you don't have to re-type your layout the next time you boot.
 
-- **Backend:** Python + `threading`. The main thread manages the HTTP server while a background daemon handles iterative API polling.
-- **Frontend:** Vanilla JS + HTML5. Uses the `fetch` API for zero-dependency live updates.
-- **Data Persistence:** JSON-based local storage.
+## License
 
-## ⚖️ License & Disclaimer
-
-This project is licensed under the MIT License. It is not affiliated with, maintained, or endorsed by Chess.com. Please ensure your `User-Agent` includes a valid email address as per Chess.com API guidelines.
-
----
-*Created by [Jasio30/GitHub]*
+This project is open-source and available under the [MIT License](LICENSE).

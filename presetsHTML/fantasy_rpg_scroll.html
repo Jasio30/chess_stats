@@ -19,6 +19,29 @@
         .chg-pos { color: #006400; }
         .chg-neg { color: #8b0000; }
     </style>
+
+    <style>
+        /* Automatically scale up the entire overlay for higher native resolution in OBS */
+        body {
+            zoom: 2.5; 
+            transform-origin: top left;
+        }
+    </style>
+
+    <script>
+        let currentPresetVersion = null;
+        setInterval(async () => {
+            try {
+                let res = await fetch("/version.json?_=" + new Date().getTime());
+                let data = await res.json();
+                if (currentPresetVersion === null) {
+                    currentPresetVersion = data.version;
+                } else if (currentPresetVersion !== data.version) {
+                    location.reload();
+                }
+            } catch(e) {}
+        }, 2000);
+    </script>
 </head>
 <body>
     <div class="scroll">

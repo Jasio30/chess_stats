@@ -6,7 +6,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
         body { background: #050505; color: #fff; font-family: 'Orbitron', sans-serif; padding: 20px; }
-        .neon-panel { border: 2px solid #00f3ff; padding: 20px; background: rgba(0, 0, 0, 0.8); box-shadow: 0 0 15px #00f3ff, inset 0 0 5px #00f3ff; position: relative; overflow: hidden; clip-path: polygon(0% 0%, 100% 0%, 100% 85%, 95% 100%, 0% 100%); }
+        .neon-panel { border: 2px solid #00f3ff; padding: 20px; background: rgba(0, 0, 0, 0.8); box-shadow: 0 0 15px #00f3ff, inset 0 0 5px #00f3ff; position: relative; overflow: hidden; }
         .glitch-text { font-size: 14px; color: #ff0055; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; display: block; }
         .stat-grid { display: flex; gap: 30px; }
         .stat { flex: 1; }
@@ -19,6 +19,29 @@
         .chg-pos { color: #00ffaa; text-shadow: none; }
         .chg-neg { color: #ff0055; text-shadow: none; }
     </style>
+
+    <style>
+        /* Automatically scale up the entire overlay for higher native resolution in OBS */
+        body {
+            zoom: 2.5; 
+            transform-origin: top left;
+        }
+    </style>
+
+    <script>
+        let currentPresetVersion = null;
+        setInterval(async () => {
+            try {
+                let res = await fetch("/version.json?_=" + new Date().getTime());
+                let data = await res.json();
+                if (currentPresetVersion === null) {
+                    currentPresetVersion = data.version;
+                } else if (currentPresetVersion !== data.version) {
+                    location.reload();
+                }
+            } catch(e) {}
+        }, 2000);
+    </script>
 </head>
 <body>
     <div class="neon-panel">
