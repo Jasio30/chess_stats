@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import time
 import threading
@@ -616,8 +617,12 @@ class StatsApp:
         self.root.title("Chess.com Live Stats Setup")
         self.root.geometry("450x440")
         
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        icon_path = os.path.join(script_dir, "icon.ico")
+        if getattr(sys, 'frozen', False):
+            base_dir = sys._MEIPASS
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            
+        icon_path = os.path.join(base_dir, "icon.ico")
         if os.path.exists(icon_path):
             try:
                 self.root.iconbitmap(icon_path)
@@ -648,8 +653,12 @@ class StatsApp:
             except:
                 pass
                 
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        presets_dir = os.path.join(script_dir, "presetsHTML")
+        if getattr(sys, 'frozen', False):
+            base_dir = sys._MEIPASS
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            
+        presets_dir = os.path.join(base_dir, "presetsHTML")
         self.presets = ["Default (Built-in)"]
         self.preset_files = {}
         if os.path.exists(presets_dir):
